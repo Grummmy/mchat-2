@@ -12,16 +12,16 @@
   },
 
   "bots": {
-    "sirius_MChat_tmp": {
+    "your bot's username": {
       "enterCommand": "/joinq sirius",
-      "pswd": "ekf82hd,r2",
+      "pswd": "your bot's password",
       "dcWebhook": "SIRIUS_DC_WEBHOOK",
       "tgChat": "-1002689868274",
       "sneak": true
     },
-    "vega_MChat_tmp": {
+    "your bot's username": {
       "enterCommand": "/joinq vega",
-      "pswd": "30fpsltnvF5",
+      "pswd": "your bot's password",
       "dcWebhook": "VEGA_DC_WEBHOOK",
       "tgChat": "-1002564552344",
       "sneak": true
