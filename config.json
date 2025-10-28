@@ -1,0 +1,62 @@
+{
+  "options": {
+    "basic": {
+      "host": "ua.countrymc.net",
+      "version": "1.16.5",
+      "port": 0
+    },
+    "extra": {
+      "brand": "MChat",
+      "viewDistance": "tiny"
+    }
+  },
+
+  "bots": {
+    "sirius_MChat_tmp": {
+      "enterCommand": "/joinq sirius",
+      "pswd": "ekf82hd,r2",
+      "dcWebhook": "SIRIUS_DC_WEBHOOK",
+      "tgChat": "-1002689868274",
+      "sneak": true
+    },
+    "vega_MChat_tmp": {
+      "enterCommand": "/joinq vega",
+      "pswd": "30fpsltnvF5",
+      "dcWebhook": "VEGA_DC_WEBHOOK",
+      "tgChat": "-1002564552344",
+      "sneak": true
+    }
+  },
+
+  "msg": {
+    "end": {
+    	"default": "## че-то я вылетел как-то, не круто в общем.",
+    	"disconnect.quitting": "## было приказано выйти, слушаюсь мастера."
+    },
+    "error": "## ох, мля, маслину поймал.",
+    "kick": "## кикнули, гады"
+  },
+
+  "replace": {
+  	"ᰁ": "G",
+  	"ᰀ": "L"
+  },
+  "exclude": {
+    "exact": [
+      ""
+    ],
+    "startsWith": [
+      "➜",
+      "☑"
+    ]
+  },
+
+  "dclink": "https://discord.gg/8TZd7KzEE6",
+
+  "login": "/l ",
+  "tgBotAPI": "TG_BOT_API",
+
+  "sendMsgInterval": 1000,
+  "interval": 3000,
+  "reconnect": 5000
+}
