@@ -4,7 +4,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const mineflayer = require("mineflayer");
 
 const config = require("./config.json");
-const { shouldIgnore, replaceMsg } = require("./utils.js")(config);
+const { sleep, shouldIgnore, replaceMsg } = require("./utils.js")(config);
 const tgbot = new TelegramBot(process.env[config.tgBotAPI], { polling: true });
 
 const consoleWarn = console.warn;
@@ -24,16 +24,6 @@ const options = {
   ...config.options.extra,
 };
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function escape(text) {
-  return text
-    .replace(/([\\*_~`>|[\]()#+\-=!{}\.])/g, '\\$1') // `
-    .replace(/@/g, '@\u200b');
-}
-
 function modifyBot(bot, username) {
   bot.log = (text) => {
     console.log(`${new Date().toISOString()} [${username}] ${text}`);
@@ -48,13 +38,23 @@ function modifyBot(bot, username) {
 
   bot.senddc = (message) => {
     // discord sendMessage method for bot
-    fetch(process.env[config.bots[username].dcWebhook], {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: message, embeds: null }),
-    });
-  };
+    for (let i = 0; i < config.dcWebhookRetry; i++) {
+      try {
+        fetch(process.env[config.bots[username].dcWebhook], {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: message, embeds: null }),
+        })
+      } catch (err) {
+        bot.log(`SENDDC ERR '${message}'\nerror: ${err}` + (
+          i != config.dcWebhookRetry ? "retry queued" : ""
+        ))
+        continue
+      }
 
+      break
+    }
+  };
 
   return bot
 }
@@ -84,14 +84,15 @@ function createBot(username) {
     bot.chat(config.bots[username].enterCommand);
 
     bot.once("spawn", () => {
-	  bot.setControlState("sneak", config.bots[username].sneak)
+			bot.setControlState("sneak", config.bots[username].sneak)
     
       bot.log("joined server");
       bot.on("spawn", async () => {
       	bot.chat(config.bots[username].enterCommand)
-		await bot.waitForTick(3)
-      	bot.setControlState("sneak", false)
-      	await bot.waitForTick(3)
+
+				await bot.waitForTick(3)
+				bot.setControlState("sneak", false)
+				await bot.waitForTick(3)
       	bot.setControlState("sneak", config.bots[username].sneak)
       });
     });
@@ -114,7 +115,7 @@ function createBot(username) {
   });
 
   bot.on("end", (reason) => {
-    const msg = config.msg.end[reason] || config.msg.end.default
+  	const msg = config.msg.end[reason] || config.msg.end.default
     bot.log(`session ended, due to: ${reason}`);
     bot.sendtg(msg);
     bot.senddc(msg);

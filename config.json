@@ -31,9 +31,10 @@
   "msg": {
     "end": {
     	"default": "## че-то я вылетел как-то, не круто в общем.",
-    	"disconnect.quitting": "## было приказано выйти, слушаюсь мастера."
+    	"disconnect.quitting": "## было приказано выйти, слушаюсь мастера.",
+    	"keepAliveError": "## упс, пропустил keepAlive пакетик"
     },
-    "error": "## ох, мля, маслину поймал.",
+    "error": "## разраб даун, у меня ошибка",
     "kick": "## кикнули, гады"
   },
 
@@ -52,6 +53,7 @@
   },
 
   "dclink": "https://discord.gg/8TZd7KzEE6",
+  "dcWebhookRetry": 2,
 
   "login": "/l ",
   "tgBotAPI": "TG_BOT_API",
