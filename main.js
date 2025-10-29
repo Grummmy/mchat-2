@@ -76,7 +76,7 @@ function createBot(username) {
 
   // print pswd, if requested
   bot.once("chat:login_request", () => {
-    bot.chat(config.login + config.bots[username].pswd);
+    bot.chat(config.login + process.env[config.bots[username].pswd]);
   });
 
   bot.once("spawn", () => {
