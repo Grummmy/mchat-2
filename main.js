@@ -24,7 +24,7 @@ const options = {
   ...config.options.extra,
 };
 
-const informed = new Set()
+const informed = new Map()
 
 function modifyBot(bot, username) {
   bot.log = (text) => {
@@ -105,14 +105,30 @@ function createBot(username) {
     if (!tgChannel) {
       tgChannel = (await tgbot.getChat(config.bots[username].tgChat)).username;
     }
-
+		const [name, message] = msg[0]
+		
 		const fallback = `привет, я ботек грума. я пересылаю все сообщения отсюда, в дискорд и тг. переходи в @${tgChannel} в телеграмме, или в ${config.dclink} в дискорде. след ответ будет от ии(наверное)`
-		const ans = informed.has(msg[0][0]) ? await aiResponse(msg[0][1], 225-6-msg[0][0].length) : fallback
-	
-    bot.chat(
-      `/msg ${msg[0][0]} ${ ans === '' || ans === 'no-response' ? fallback : ans}`,
-    );
-    informed.add(msg[0][0])
+		let ans = fallback
+
+		if (!informed[name]) {
+			bot.chat(`/msg ${name} ${ans}`)
+			informed[name] = []
+			return
+		} else if (informed[name].length >= config.ai.history*2) {
+			informed[name].splice(0, 2)
+		}
+
+		informed[name].push({ role: "user", parts: [{ text: message }] })
+		
+		ans = await aiResponse(informed[name], 255-6-name.length)
+    if (ans && ans !== "no-response") {
+    	informed[name].push({ role: "model", parts: [{ text: ans }] })
+    } else {
+    	ans = fallback
+    }
+    bot.log(JSON.stringify(informed, null, 2))
+    
+    bot.chat(`/msg ${name} ${ans}`)
   });
 
   bot.on("message", (msg) => {

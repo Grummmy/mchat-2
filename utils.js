@@ -31,25 +31,23 @@ function create_aiResponse() {
 	const apiKey = process.env?.[ai?.apiKey]
 
 	if (apiKey && ai?.model) {
-		return async function aiResponse(text, limit) {
+		return async function aiResponse(messages, limit) {
 			const req = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${ai.model}:generateContent?key=${apiKey}`, {
 			  method: "POST",
 			  headers: { "Content-Type": "application/json" },
 			  body: JSON.stringify({
 			  	system_instruction: { parts: [{ text: config.ai?.instructions || "" }] },
-			    contents: [
-			    	{ role: "user", parts: [{ text: text }] }
-			    ],
+			    contents: messages,
 			    generationConfig: { maxOutputTokens: limit || 255 }
 			  })
 			});
-
+			
 			const resp = await req.json()
 			if (req.status !== 200 || !resp.candidates?.[0]?.content?.parts?.[0]?.text) {
 				console.log(`AI answer failure: code ${req.status}: ${req.statusText}\n${JSON.stringify(resp, null, 2)}`)
 				return "no-response"
 			} else {
-				return resp.candidates[0].content.parts[0].text
+				return resp.candidates[0].content.parts[0].text.slice(0, limit+1)
 			}
 		}
 	} else {
