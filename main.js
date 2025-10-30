@@ -4,7 +4,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const mineflayer = require("mineflayer");
 
 const config = require("./config.json");
-const { sleep, shouldIgnore, replaceMsg } = require("./utils.js")(config);
+const { sleep, shouldIgnore, replaceMsg, aiResponse } = require("./utils.js")(config);
 const tgbot = new TelegramBot(process.env[config.tgBotAPI], { polling: true });
 
 const consoleWarn = console.warn;
@@ -23,6 +23,8 @@ const options = {
   //   username: config.username,
   ...config.options.extra,
 };
+
+const informed = new Set()
 
 function modifyBot(bot, username) {
   bot.log = (text) => {
@@ -71,7 +73,7 @@ function createBot(username) {
       /\s?\[\!\]\sНужно войти в аккаунт:\s\/l\sпароль\s*/gi,
       { repeat: false },
     );
-    bot.addChatPattern("dm", /\[(.*) -> Я\] /i, { parse: true });
+    bot.addChatPattern("dm", /\[(.*) -> Я\] (.*)/i, { parse: true });
   });
 
   // print pswd, if requested
@@ -90,9 +92,9 @@ function createBot(username) {
       bot.on("spawn", async () => {
       	bot.chat(config.bots[username].enterCommand)
 
-				await bot.waitForTick(3)
+				await bot?.waitForTick(3)
 				bot.setControlState("sneak", false)
-				await bot.waitForTick(3)
+				await bot?.waitForTick(3)
       	bot.setControlState("sneak", config.bots[username].sneak)
       });
     });
@@ -102,10 +104,14 @@ function createBot(username) {
     if (!tgChannel) {
       tgChannel = (await tgbot.getChat(config.bots[username].tgChat)).username;
     }
-		// await sleep(1000)
+
+		const fallback = `привет, я ботек грума. я пересылаю все сообщения отсюда, в дискорд и тг. переходи в @${tgChannel} в телеграмме, или в ${config.dclink} в дискорде. след ответ будет от ии(наверное)`
+		const ans = informed.has(msg[0][0]) ? await aiResponse(msg[0][1], 225-6-msg[0][0].length) : fallback
+	
     bot.chat(
-      `/msg ${msg[0][0]} привет, я ботек грума. я пересылаю все сообщения отсюда, в дискорд и тг. переходи в @${tgChannel} в телеграмме, или в ${config.dclink} в дискорде.`,
+      `/msg ${msg[0][0]} ${ ans === '' || ans === 'no-response' ? fallback : ans}`,
     );
+    informed.add(msg[0][0])
   });
 
   bot.on("message", (msg) => {

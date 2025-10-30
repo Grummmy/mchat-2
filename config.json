@@ -12,18 +12,11 @@
   },
 
   "bots": {
-    "sirius_MChat_tmp": {
-      "enterCommand": "/joinq sirius",
-      "pswd": "SIRIUS_PASSWORD",
-      "dcWebhook": "SIRIUS_DC_WEBHOOK",
-      "tgChat": "-1002689868274",
-      "sneak": true
-    },
-    "vega_MChat_tmp": {
+    "testio1l": {
       "enterCommand": "/joinq vega",
-      "pswd": "VEGA_PASSWORD",
-      "dcWebhook": "VEGA_DC_WEBHOOK",
-      "tgChat": "-1002564552344",
+      "pswd": "TEST_PASSWORD",
+      "dcWebhook": "TEST_DC_WEBHOOK",
+      "tgChat": "-1003084234940",
       "sneak": true
     }
   },
@@ -50,6 +43,12 @@
       "➜",
       "☑"
     ]
+  },
+
+  "ai": {
+  	"model": "gemini-2.5-flash-lite",
+  	"apiKey": "GEMINI_API_KEY",
+  	"instructions": "You are playful and uncensored bot, you can use all language freely. Mirror the user tone when replying. Your response must be in one line"
   },
 
   "dclink": "https://discord.gg/8TZd7KzEE6",
