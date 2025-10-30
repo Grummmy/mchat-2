@@ -4,7 +4,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const mineflayer = require("mineflayer");
 
 const config = require("./config.json");
-const { sleep, shouldIgnore, replaceMsg, aiResponse } = require("./utils.js")(config);
+const { escape, sleep, shouldIgnore, replaceMsg, aiResponse } = require("./utils.js")(config);
 const tgbot = new TelegramBot(process.env[config.tgBotAPI], { polling: true });
 
 const consoleWarn = console.warn;
@@ -40,6 +40,7 @@ function modifyBot(bot, username) {
 
   bot.senddc = (message) => {
     // discord sendMessage method for bot
+    if (!config.allowFormatting) message = escape(message)
     for (let i = 0; i < config.dcWebhookRetry; i++) {
       try {
         fetch(process.env[config.bots[username].dcWebhook], {
