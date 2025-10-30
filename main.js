@@ -126,7 +126,6 @@ function createBot(username) {
     } else {
     	ans = fallback
     }
-    bot.log(JSON.stringify(informed, null, 2))
     
     bot.chat(`/msg ${name} ${ans}`)
   });
