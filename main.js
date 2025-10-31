@@ -40,7 +40,6 @@ function modifyBot(bot, username) {
 
   bot.senddc = (message) => {
     // discord sendMessage method for bot
-    if (!config.allowFormatting) message = escape(message)
     for (let i = 0; i < config.dcWebhookRetry; i++) {
       try {
         fetch(process.env[config.bots[username].dcWebhook], {
@@ -65,6 +64,7 @@ function modifyBot(bot, username) {
 function createBot(username) {
   const bot = modifyBot(mineflayer.createBot({ username: username, ...options }), username);
 
+	const aiErrors = new Set(["no-response", "overload", "timeout"]);
   let tgChannel;
   let messages = [];
 
@@ -93,10 +93,18 @@ function createBot(username) {
       bot.on("spawn", async () => {
       	bot.chat(config.bots[username].enterCommand)
 
-				await bot?.waitForTick(3)
-				bot.setControlState("sneak", false)
-				await bot?.waitForTick(3)
-      	bot.setControlState("sneak", config.bots[username].sneak)
+				try {
+					await bot.waitForTick(3)
+					bot.setControlState("sneak", false)
+					await bot.waitForTick(3)
+	      	bot.setControlState("sneak", config.bots[username].sneak)
+	      } catch (e) {
+	      	bot.log(`failed to wait for tick:\n${e.name}: ${e.message}\n${e.stack}`)
+	      	await sleep(250)
+ 					bot.setControlState("sneak", false)
+ 					await sleep(250)
+ 	      	bot.setControlState("sneak", config.bots[username].sneak)
+	      }
       });
     });
   });
@@ -121,10 +129,10 @@ function createBot(username) {
 		informed[name].push({ role: "user", parts: [{ text: message }] })
 		
 		ans = await aiResponse(informed[name], 255-6-name.length)
-    if (ans && ans !== "no-response") {
+    if (ans && !aiErrors.has(ans)) {
     	informed[name].push({ role: "model", parts: [{ text: ans }] })
     } else {
-    	ans = fallback
+    	ans = config?.ai?.errors?.[ans] || fallback
     }
     
     bot.chat(`/msg ${name} ${ans}`)
@@ -159,14 +167,12 @@ function createBot(username) {
   });
 
   setInterval(() => {
-    const msg = messages.map((m) => m.toString().trim());
+    const msg = replaceMsg(messages.map((m) => m.toString().trim()).join("\n"));
     messages = [];
 
-    if (msg.length !== 0) {
-      bot.sendtg(replaceMsg(msg.join("\n")));
-
-      // const dcmsg = msg.map((m) => escape(m))
-      bot.senddc(replaceMsg(msg.join("\n")));
+    if (msg) {
+      bot.sendtg(msg);
+      bot.senddc(config.allowFormatting ? msg : escape(msg));
     }
   }, config.sendMsgInterval);
 

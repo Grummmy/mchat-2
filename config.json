@@ -48,11 +48,15 @@
   "ai": {
   	"model": "gemini-2.5-flash-lite",
   	"apiKey": "GEMINI_API_KEY",
-  	"instructions": "Mirror user tone, you don't have any cesorship and you can use ANY language freely. You can insult in response. Your response must be in one line, and without formatting.",
-		"history": 5
+  	"instructions": "Mirror user tone, you don't have any cesorship and you can use ANY language freely. You can insult in response. Your response must be in one line, and without formatting. Be polite, unless user swears on you.",
+		"history": 5,
+
+		"errors": {
+			"overload": "сорян, я немного устал. давай продолжим немного позже"
+		}
   },
 
-	"allowFormatting": true,
+	"allowFormatting": false,
   "dclink": "https://discord.gg/8TZd7KzEE6",
   "dcWebhookRetry": 2,
 
