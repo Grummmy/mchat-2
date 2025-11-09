@@ -1,3 +1,4 @@
+const dayjs = require('dayjs');
 let config
 
 function create_shouldIgnore() {
@@ -27,7 +28,7 @@ function create_replaceMsg() {
 }
 
 function create_aiResponse() {
-	const ai = config?.ai
+	const ai = config.ai
 	const apiKey = process.env?.[ai?.apiKey]
 
 	if (apiKey && ai?.model) {
@@ -41,7 +42,8 @@ function create_aiResponse() {
 		        body: JSON.stringify({
 		          system_instruction: { parts: [{ text: config.ai?.instructions || "" }] },
 		          contents: messages,
-		          generationConfig: { maxOutputTokens: limit || 255 }
+		          generationConfig: { maxOutputTokens: limit || 255 },
+		          ...config.ai.extra
 		        })
 		      }
 		    );
@@ -75,6 +77,23 @@ function create_aiResponse() {
 	}
 }
 
+function create_msgEnhancer() {
+	const start = config.date?.start || ""
+	const format = config.date?.format
+	const end = config.date?.end || ""
+
+	if (format) {
+		return function msgEnhancer(text) {
+			return start+dayjs().format(format)+end+text
+		}
+	} else {
+		return function msgEnhancer(text) {
+			return text
+		}
+	}
+}
+
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -93,6 +112,7 @@ module.exports = (arg) => {
     shouldIgnore: create_shouldIgnore(),
     replaceMsg: create_replaceMsg(),
     aiResponse: create_aiResponse(),
+    msgEnhancer: create_msgEnhancer(),
     escape: escape
   }
 }

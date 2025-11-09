@@ -4,7 +4,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const mineflayer = require("mineflayer");
 
 const config = require("./config.json");
-const { escape, sleep, shouldIgnore, replaceMsg, aiResponse } = require("./utils.js")(config);
+const { escape, sleep, shouldIgnore, replaceMsg, aiResponse, msgEnhancer } = require("./utils.js")(config);
 const tgbot = new TelegramBot(process.env[config.tgBotAPI], { polling: true });
 
 const consoleWarn = console.warn;
@@ -99,7 +99,7 @@ function createBot(username) {
 					await bot.waitForTick(3)
 	      	bot.setControlState("sneak", config.bots[username].sneak)
 	      } catch (e) {
-	      	bot.log(`failed to wait for tick:\n${e.name}: ${e.message}\n${e.stack}`)
+	      	bot.log(`failed to wait for tick: ${e.name}: ${e.message}`)
 	      	await sleep(250)
  					bot.setControlState("sneak", false)
  					await sleep(250)
@@ -140,7 +140,7 @@ function createBot(username) {
 
   bot.on("message", (msg) => {
     if (!shouldIgnore(msg.toString())) {
-      messages.push(msg);
+      messages.push(msgEnhancer(msg));
     }
   });
 
