@@ -2,9 +2,11 @@ require("dotenv").config();
 
 const TelegramBot = require("node-telegram-bot-api");
 const mineflayer = require("mineflayer");
+const registry = require('prismarine-registry')('1.16.5')
+const ChatMessage = require('prismarine-chat')(registry)
 
 const config = require("./config.json");
-const { escape, sleep, shouldIgnore, replaceMsg, aiResponse, msgEnhancer } = require("./utils.js")(config);
+const { escape, sleep, shouldIgnore, replaceMsg, aiResponse, dateAdder } = require("./utils.js")(config);
 const tgbot = new TelegramBot(process.env[config.tgBotAPI], { polling: true });
 
 const consoleWarn = console.warn;
@@ -74,7 +76,8 @@ function createBot(username) {
       /\s?\[\!\]\sНужно войти в аккаунт:\s\/l\sпароль\s*/gi,
       { repeat: false },
     );
-    bot.addChatPattern("dm", /\[(.*) -> Я\] (.*)/i, { parse: true });
+    bot.addChatPattern("dm", /\[(.*) -> Я\]\s(.*)/i, { parse: true });
+    bot.addChatPattern("adm", /\[Grumm -> Я\]\s(.*)/i, { parse: true });
   });
 
   // print pswd, if requested
@@ -138,9 +141,22 @@ function createBot(username) {
     bot.chat(`/msg ${name} ${ans}`)
   });
 
+
+	const motdRegex = new RegExp('§(?:[#][0-9a-f]{6}|[0-9a-fk-or])', 'gi')
+  bot.on("chat:adm", (msg) => {
+  	if (msg[0][0].trim() === "pl") {
+  		const players = bot.players
+			for (const player in players) {
+				const motd = new ChatMessage(players[player].displayName.json).toMotd()
+				
+				console.log(motd)
+			}
+  	}
+  })
+
   bot.on("message", (msg) => {
     if (!shouldIgnore(msg.toString())) {
-      messages.push(msgEnhancer(msg));
+      messages.push(msg);
     }
   });
 
@@ -167,11 +183,11 @@ function createBot(username) {
   });
 
   setInterval(() => {
-    const msg = replaceMsg(messages.map((m) => m.toString().trim()).join("\n"));
+    const msgs = messages.map((m) => dateAdder(m.toString().trim()));
     messages = [];
 
     if (msg) {
-      bot.sendtg(msg);
+      bot.sendtg(replaceMsg(msg.join("\n")));
       bot.senddc(config.allowFormatting ? msg : escape(msg));
     }
   }, config.sendMsgInterval);

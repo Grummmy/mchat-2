@@ -78,9 +78,12 @@
   },
 
   "date": {
-  	"start": "[",
-  	"format": "HH:mm:ss",
-  	"end": "] "
+  	"format": "[hh:mm:ss] ",
+  	"placeholders": {
+  		"hour": "hh",
+  		"minute": "mm",
+  		"second": "ss"
+  	}
   },
 
 	"allowFormatting": false,

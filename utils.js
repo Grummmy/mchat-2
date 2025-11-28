@@ -1,4 +1,3 @@
-const dayjs = require('dayjs');
 let config
 
 function create_shouldIgnore() {
@@ -77,17 +76,24 @@ function create_aiResponse() {
 	}
 }
 
-function create_msgEnhancer() {
-	const start = config.date?.start || ""
+function create_dateAdder() {
 	const format = config.date?.format
-	const end = config.date?.end || ""
+	const plcholds = config.date?.placeholders
 
 	if (format) {
-		return function msgEnhancer(text) {
-			return start+dayjs().format(format)+end+text
+		return function dateAdder(text) {
+			const today = Math.floor((Date.now() % 86400000) / 1000);
+			
+			const s = today % 60
+			const m = Math.floor(today / 60) % 60
+			const h = Math.floor(today / 3600)
+
+			return format.replace(plcholds.hour, `${h < 10 ? "0" : ""}${h}`)
+				.replace(plcholds.minute, `${m < 10 ? "0" : ""}${m}`)
+				.replace(plcholds.second, `${s < 10 ? "0" : ""}${s}`)+text
 		}
 	} else {
-		return function msgEnhancer(text) {
+		return function dateAdder(text) {
 			return text
 		}
 	}
@@ -112,7 +118,7 @@ module.exports = (arg) => {
     shouldIgnore: create_shouldIgnore(),
     replaceMsg: create_replaceMsg(),
     aiResponse: create_aiResponse(),
-    msgEnhancer: create_msgEnhancer(),
+    dateAdder: create_dateAdder(),
     escape: escape
   }
 }
