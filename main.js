@@ -6,7 +6,8 @@ const registry = require('prismarine-registry')('1.16.5')
 const ChatMessage = require('prismarine-chat')(registry)
 
 const config = require("./config.json");
-const { escape, sleep, shouldIgnore, replaceMsg, aiResponse, dateAdder } = require("./utils.js")(config);
+const { escape, sleep, shouldIgnore, replaceMsg, dateAdder } = require("./utils.js")(config);
+const { aiResponse } = require("./ai.js")(config);
 const tgbot = new TelegramBot(process.env[config.tgBotAPI], { polling: true });
 
 const consoleWarn = console.warn;
@@ -186,9 +187,13 @@ function createBot(username) {
     const msgs = messages.map((m) => dateAdder(m.toString().trim()));
     messages = [];
 
-    if (msg) {
-      bot.sendtg(replaceMsg(msg.join("\n")));
-      bot.senddc(config.allowFormatting ? msg : escape(msg));
+    if (msgs.length > 0) {
+      bot.sendtg(replaceMsg(msgs.join("\n")));
+      if (config.allowFormatting) {
+      	bot.senddc(msgs.joinq("\n"));
+      } else {
+      	bot.senddc(msgs.map(m => m.slice(0, config.date.format.length) + escape(m.slice(config.date.format.length))).join("\n"))
+      }
     }
   }, config.sendMsgInterval);
 
